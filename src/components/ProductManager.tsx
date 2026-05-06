@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Pencil, Package, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Pencil, Package, AlertCircle, Search, X } from 'lucide-react';
 import { Product } from '../types';
 import { formatCurrency } from '../lib/utils';
 
@@ -12,6 +12,12 @@ export function ProductManager({ products, onAction }: ProductManagerProps) {
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(search.toLowerCase()) || 
+    p.type.toLowerCase().includes(search.toLowerCase())
+  );
 
   const resetForm = () => {
     setEditingProduct(null);
@@ -24,153 +30,147 @@ export function ProductManager({ products, onAction }: ProductManagerProps) {
   };
 
   return (
-    <div className="view-container">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Catálogo de Productos</h1>
-        {!isAdding && !editingProduct && (
-          <button 
-            onClick={() => setIsAdding(true)}
-            className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors shadow-sm"
-          >
-            <Plus size={18} />
-            Agregar Producto
-          </button>
-        )}
+    <div className="space-y-6">
+      <div className="flex justify-between items-center px-1">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Catálogo</h1>
+          <p className="text-slate-500 text-sm font-medium">Gestiona tus productos y precios</p>
+        </div>
+        <button 
+          onClick={() => setIsAdding(true)}
+          className="bg-slate-900 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-2xl shadow-lg active:scale-95 transition-all flex items-center gap-2 font-bold text-sm"
+        >
+          <Plus size={20} />
+          <span className="hidden md:inline">Nuevo Producto</span>
+        </button>
       </div>
 
-      {(isAdding || editingProduct) && (
-        <div className="bg-white p-6 rounded-xl shadow-md border-2 border-amber-100 mb-8 overflow-hidden">
-          <h2 className="font-bold text-lg mb-4 text-slate-700 flex items-center gap-2">
-            <Package size={20} className="text-amber-600" />
-            {isAdding ? 'Nuevo Producto' : 'Editar Producto'}
-          </h2>
-          <form className="grid grid-cols-1 md:grid-cols-4 gap-4" onSubmit={(e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const data = Object.fromEntries(formData.entries());
-            onAction(isAdding ? 'add' : 'edit', { 
-              ...editingProduct, 
-              ...data, 
-              price: parseFloat(data.price as string), 
-              stock: data.stock ? parseFloat(data.stock as string) : undefined 
-            });
-            resetForm();
-          }}>
-            <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Nombre</label>
-              <input name="name" required defaultValue={editingProduct?.name} className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 outline-none" placeholder="Nombre del producto" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Tipo</label>
-              <select name="type" required defaultValue={editingProduct?.type || 'Tirante'} className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white">
-                <option>Tirante</option>
-                <option>Viga</option>
-                <option>Columna</option>
-                <option>Tabla</option>
-                <option>Tablón</option>
-                <option>Machimbre</option>
-                <option>Listón</option>
-                <option>Revestimiento</option>
-                <option>Zócalo</option>
-                <option>Placa</option>
-                <option>Madera Dura</option>
-                <option>Insumos</option>
-                <option>Subproducto</option>
-                <option>Exterior</option>
-                <option>Terminado</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Precio x Unidad/Medida</label>
-              <input name="price" type="number" step="0.01" required defaultValue={editingProduct?.price} className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 outline-none" />
-            </div>
-             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Unidad de Venta</label>
-              <select name="unit" required defaultValue={editingProduct?.unit || 'unidad'} className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 outline-none bg-white">
-                <option value="unidad">Por Unidad</option>
-                <option value="metro">Por Metro</option>
-                <option value="metro m2">Por m²</option>
-                <option value="ml">Metro Lineal</option>
-              </select>
-            </div>
-            <div className="md:col-span-4 flex justify-end gap-3 pt-2">
-              <button type="button" onClick={resetForm} className="text-slate-500 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm transition-colors">Cancelar</button>
-              <button type="submit" className="bg-amber-700 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-amber-800 transition-colors">
-                {isAdding ? 'Guardar Producto' : 'Actualizar Producto'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      {/* Buscador */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+        <input 
+          type="text"
+          placeholder="Buscar por nombre o categoría..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-sm md:text-base outline-none focus:ring-2 focus:ring-amber-500 transition-all shadow-sm"
+        />
+      </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-wider">Producto</th>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-wider">Tipo</th>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-wider text-right">Precio</th>
-              <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-wider text-right">Opciones</th>
+      {/* ── VERSION ESCRITORIO: TABLA (RESTAURADA) ── */}
+      <div className="hidden md:block bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-slate-50/50 border-b border-slate-100">
+              <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Producto</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Categoría</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Precio / Unidad</th>
+              <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {products.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">No hay productos en el catálogo</td>
+          <tbody className="divide-y divide-slate-50">
+            {filteredProducts.map(product => (
+              <tr key={product.id} className="hover:bg-slate-50/50 transition-colors group">
+                <td className="px-6 py-4 font-black text-slate-800 uppercase text-sm tracking-tight">{product.name}</td>
+                <td className="px-6 py-4">
+                  <span className="text-[10px] font-black text-amber-700 bg-amber-50 px-2 py-1 rounded-md uppercase">{product.type}</span>
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <p className="font-black text-slate-800">{formatCurrency(product.price)}</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase">por {product.unit}</p>
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => setEditingProduct(product)} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-white rounded-xl shadow-sm border border-transparent hover:border-slate-100 transition-all">
+                      <Pencil size={16} />
+                    </button>
+                    <button onClick={() => setDeleteId(product.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-white rounded-xl shadow-sm border border-transparent hover:border-slate-100 transition-all">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
               </tr>
-            ) : (
-              products.map(product => (
-                <tr key={product.id} className="hover:bg-slate-50 transition-colors group">
-                  <td className="px-6 py-4">
-                    <p className="font-semibold text-slate-800 uppercase tracking-tighter">{product.name}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs font-bold uppercase">{product.type}</span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <p className="font-bold text-slate-800">{formatCurrency(product.price)}</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-medium">por {product.unit}</p>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end gap-1">
-                      <button 
-                        onClick={() => setEditingProduct(product)} 
-                        className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
-                        title="Editar"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button 
-                        onClick={() => setDeleteId(product.id)} 
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                        title="Eliminar"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* ── VERSION MÓVIL: TARJETAS (MANTENIDA) ── */}
+      <div className="md:hidden grid gap-3">
+        {filteredProducts.map(product => (
+          <div key={product.id} className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <span className="text-[9px] font-black uppercase text-amber-600 bg-amber-50 px-2 py-0.5 rounded mb-1 inline-block">{product.type}</span>
+              <p className="font-black text-slate-800 text-sm uppercase truncate leading-tight">{product.name}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase">{formatCurrency(product.price)} / {product.unit}</p>
+            </div>
+            <div className="flex gap-1">
+              <button onClick={() => setEditingProduct(product)} className="p-2 text-slate-300 hover:text-amber-600"><Pencil size={18} /></button>
+              <button onClick={() => setDeleteId(product.id)} className="p-2 text-slate-300 hover:text-red-500"><Trash2 size={18} /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal de Edición (Adaptable) */}
+      {(isAdding || editingProduct) && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-end md:items-center justify-center p-0 md:p-4">
+          <div className="bg-white rounded-t-3xl md:rounded-[2rem] p-6 md:p-8 w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300">
+            <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
+              <Package className="text-amber-600" size={24} />
+              {isAdding ? 'Nuevo Producto' : 'Editar Producto'}
+            </h2>
+            <form className="space-y-4" onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const data = Object.fromEntries(formData.entries());
+              onAction(isAdding ? 'add' : 'edit', { ...editingProduct, ...data, price: parseFloat(data.price as string) });
+              resetForm();
+            }}>
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 px-1 tracking-widest">Nombre</label>
+                <input name="name" required defaultValue={editingProduct?.name} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:ring-2 focus:ring-amber-500" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 px-1 tracking-widest">Categoría</label>
+                  <select name="type" required defaultValue={editingProduct?.type || 'Construcción'} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none appearance-none">
+                    <option>Construcción</option><option>Madera Aserrada</option><option>Machimbres</option><option>Placas</option><option>Carpintería</option><option>Exterior</option><option>Insumos</option><option>Terminados</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 px-1 tracking-widest">Unidad</label>
+                  <select name="unit" required defaultValue={editingProduct?.unit || 'un.'} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none appearance-none">
+                    <option value="un.">Unidad</option><option value="m">Metro</option><option value="m2">m²</option><option value="ml">Lineal</option><option value="placa">Placa</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 px-1 tracking-widest">Precio Unitario ($)</label>
+                <input name="price" type="number" step="0.01" required defaultValue={editingProduct?.price} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold outline-none" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button type="button" onClick={resetForm} className="flex-1 py-4 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm">Cancelar</button>
+                <button type="submit" className="flex-1 py-4 rounded-2xl bg-stone-900 text-white font-bold text-sm shadow-xl">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmación de Borrado */}
       {deleteId && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <div className="flex items-center gap-3 text-red-600 mb-4">
-              <AlertCircle size={24} />
-              <h3 className="text-lg font-bold">¿Eliminar producto?</h3>
-            </div>
-            <p className="text-slate-600 mb-6 text-sm">
-              Esta acción no se puede deshacer. Si el producto está en presupuestos existentes, la eliminación podría fallar o causar inconsistencias.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setDeleteId(null)} className="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors">Cancelar</button>
-              <button onClick={() => handleDelete(deleteId)} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-red-700 transition-colors">Eliminar</button>
-            </div>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl text-center">
+             <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle size={32} />
+             </div>
+             <h3 className="text-xl font-black text-slate-900 mb-2">¿Eliminar producto?</h3>
+             <p className="text-slate-500 text-sm mb-6 font-medium">Esta acción quitará el producto permanentemente.</p>
+             <div className="flex gap-3">
+               <button onClick={() => setDeleteId(null)} className="flex-1 py-3.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm">Cancelar</button>
+               <button onClick={() => handleDelete(deleteId)} className="flex-1 py-3.5 rounded-2xl bg-red-600 text-white font-bold text-sm">Sí, borrar</button>
+             </div>
           </div>
         </div>
       )}

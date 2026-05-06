@@ -14,7 +14,6 @@ export function Dashboard({ quotes, products, onViewQuotes, onNewQuote }: Dashbo
   const totalQuoted = quotes.reduce((sum, q) => sum + q.total, 0);
   const avgQuote = quotes.length > 0 ? totalQuoted / quotes.length : 0;
   
-  // Calculate most quoted products
   const productCounts: Record<string, number> = {};
   quotes.forEach(q => {
     q.items.forEach(item => {
@@ -26,79 +25,78 @@ export function Dashboard({ quotes, products, onViewQuotes, onNewQuote }: Dashbo
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5);
 
-  const recentQuotes = quotes.slice(0, 3);
+  const recentQuotes = quotes.slice(0, 5);
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center px-1">
         <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Dashboard</h1>
-          <p className="text-slate-500 font-medium">Bienvenido al panel de control de MadereraPro.</p>
+          <h1 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight">Inicio</h1>
+          <p className="text-slate-500 text-sm md:text-base font-medium">Panel de control MadereraPro</p>
         </div>
         <button 
           onClick={onNewQuote}
-          className="bg-amber-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-amber-800 transition-all flex items-center gap-2 active:scale-95"
+          className="hidden md:flex bg-amber-700 text-white px-6 py-3 rounded-2xl font-black shadow-xl shadow-amber-900/10 hover:bg-amber-800 transition-all items-center gap-2 active:scale-95"
         >
           <FileText size={20} />
           Nuevo Presupuesto
         </button>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Grid - 2 columnas en mobile, 4 en desktop */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
         <StatCard 
-          icon={<DollarSign className="text-green-600" />} 
-          label="Total Presupuestado" 
+          icon={<DollarSign size={20} className="text-green-600" />} 
+          label="Total" 
           value={formatCurrency(totalQuoted)} 
-          subtext="Histórico acumulado"
+          subtext="Histórico"
         />
         <StatCard 
-          icon={<FileText className="text-blue-600" />} 
+          icon={<FileText size={20} className="text-blue-600" />} 
           label="Presupuestos" 
           value={quotes.length.toString()} 
-          subtext={`${recentQuotes.length} recientes`}
+          subtext="Generados"
         />
         <StatCard 
-          icon={<Package className="text-amber-600" />} 
-          label="Catálogo" 
+          icon={<Package size={20} className="text-amber-600" />} 
+          label="Productos" 
           value={products.length.toString()} 
-          subtext="Productos activos"
+          subtext="En catálogo"
         />
         <StatCard 
-          icon={<TrendingUp className="text-purple-600" />} 
+          icon={<TrendingUp size={20} className="text-purple-600" />} 
           label="Promedio" 
           value={formatCurrency(avgQuote)} 
-          subtext="Por presupuesto"
+          subtext="Por cliente"
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div className="md:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-slate-800">Presupuestos Recientes</h3>
-            <button onClick={onViewQuotes} className="text-amber-700 text-sm font-bold flex items-center gap-1 hover:underline">
+            <h3 className="font-black text-slate-800 uppercase text-xs tracking-widest">Actividad Reciente</h3>
+            <button onClick={onViewQuotes} className="text-amber-700 text-xs font-black flex items-center gap-1 hover:underline">
               Ver todos <ArrowRight size={14} />
             </button>
           </div>
           <div className="space-y-4">
             {recentQuotes.length === 0 ? (
-              <p className="text-center py-8 text-slate-400 italic">No hay actividad reciente</p>
+              <p className="text-center py-12 text-slate-400 text-sm italic">No hay actividad reciente</p>
             ) : (
               recentQuotes.map(quote => (
-                <div key={quote.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-amber-200 transition-colors">
+                <div key={quote.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100 hover:border-amber-200 transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-lg shadow-sm text-amber-700">
-                      <FileText size={20} />
+                    <div className="bg-white p-2.5 rounded-xl text-amber-700 shadow-sm border border-slate-100">
+                      <FileText size={18} />
                     </div>
                     <div>
-                      <p className="font-bold text-slate-800">{quote.clientName || 'Consumidor Final'}</p>
-                      <p className="text-xs text-slate-500">{new Date(quote.createdAt).toLocaleDateString()}</p>
+                      <p className="font-black text-slate-800 text-sm md:text-base uppercase tracking-tight truncate max-w-[150px] md:max-w-none">{quote.clientName || 'Consumidor Final'}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase">{new Date(quote.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-black text-slate-800">{formatCurrency(quote.total)}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">{quote.items.length} items</p>
+                    <p className="font-black text-slate-800 md:text-lg tracking-tighter">{formatCurrency(quote.total)}</p>
                   </div>
                 </div>
               ))
@@ -107,21 +105,21 @@ export function Dashboard({ quotes, products, onViewQuotes, onNewQuote }: Dashbo
         </div>
 
         {/* Top Products */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Más Vendidos</h3>
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
+          <h3 className="font-black text-slate-800 uppercase text-xs tracking-widest mb-6">Más Vendidos</h3>
           <div className="space-y-6">
             {topProducts.length === 0 ? (
-              <p className="text-center py-8 text-slate-400 italic">Sin datos de productos</p>
+              <p className="text-center py-12 text-slate-400 text-sm italic">Sin datos</p>
             ) : (
               topProducts.map(([name, count], index) => (
                 <div key={name} className="flex items-center gap-4">
-                  <div className="w-8 h-8 flex items-center justify-center rounded-full bg-amber-50 text-amber-700 font-bold text-xs">
-                    #{index + 1}
+                  <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-amber-50 text-amber-700 font-black text-xs">
+                    {index + 1}
                   </div>
-                  <div className="flex-grow">
+                  <div className="flex-grow min-w-0">
                     <div className="flex justify-between mb-1">
-                      <p className="text-sm font-bold text-slate-700 truncate max-w-[120px]">{name}</p>
-                      <p className="text-xs font-bold text-slate-500">{count} unidades</p>
+                      <p className="text-xs font-black text-slate-700 uppercase truncate leading-none">{name}</p>
+                      <p className="text-[10px] font-black text-slate-400">{count} un.</p>
                     </div>
                     <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                       <div className="bg-amber-600 h-full rounded-full" style={{ width: `${Math.min(100, (count / (topProducts[0][1] as number)) * 100)}%` }} />
@@ -139,13 +137,13 @@ export function Dashboard({ quotes, products, onViewQuotes, onNewQuote }: Dashbo
 
 function StatCard({ icon, label, value, subtext }: { icon: React.ReactNode, label: string, value: string, subtext: string }) {
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-      <div className="bg-slate-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+    <div className="bg-white p-5 md:p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-all group">
+      <div className="bg-slate-50 w-10 h-10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
         {icon}
       </div>
-      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">{label}</p>
-      <h4 className="text-2xl font-black text-slate-800 mb-1">{value}</h4>
-      <p className="text-xs text-slate-400 font-medium">{subtext}</p>
+      <p className="text-slate-400 text-[10px] md:text-xs font-black uppercase tracking-widest mb-1 truncate">{label}</p>
+      <h4 className="text-lg md:text-2xl font-black text-slate-800 tracking-tighter mb-0.5 truncate">{value}</h4>
+      <p className="text-[10px] text-slate-400 font-bold uppercase">{subtext}</p>
     </div>
   );
 }
