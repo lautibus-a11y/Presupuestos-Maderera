@@ -1,7 +1,8 @@
-import React from 'react';
-import { ArrowLeft, Printer, Share2, Check, Copy } from 'lucide-react';
+import React, { useRef } from 'react';
+import { ArrowLeft, Printer, Share2, Check, Copy, Image as ImageIcon } from 'lucide-react';
 import { Quote } from '../types';
 import { formatCurrency } from '../lib/utils';
+import { toJpeg } from 'html-to-image';
 
 interface QuoteViewProps {
   quote: Quote;
@@ -10,6 +11,8 @@ interface QuoteViewProps {
 
 export function QuoteView({ quote, onBack }: QuoteViewProps) {
   const [copied, setCopied] = React.useState(false);
+  const [isExporting, setIsExporting] = React.useState(false);
+  const quoteRef = useRef<HTMLDivElement>(null);
 
   const downloadPDF = () => {
     const clientName = quote.clientName || 'Consumidor Final';
@@ -227,6 +230,29 @@ export function QuoteView({ quote, onBack }: QuoteViewProps) {
     win.document.close();
   };
 
+  const exportAsImage = async () => {
+    if (!quoteRef.current) return;
+    setIsExporting(true);
+    
+    try {
+      const dataUrl = await toJpeg(quoteRef.current, {
+        quality: 0.95,
+        backgroundColor: '#ffffff',
+        pixelRatio: 2 // Mayor nitidez
+      });
+      
+      const link = document.createElement('a');
+      link.download = `presupuesto-${quote.id.slice(-6)}.jpg`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Error al exportar imagen:', err);
+      alert('No se pudo generar la imagen. Intenta con PDF.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const shareWhatsApp = () => {
     const message = `*MadereraPro — Presupuesto #${quote.id.slice(-6).toUpperCase()}*\n\nHola ${quote.clientName || ''} 👋, te comparto el presupuesto solicitado:\n\n${quote.items.map(i => `• ${i.product?.name}: ${i.quantity} ${i.product?.unit} → ${formatCurrency(i.subtotal)}`).join('\n')}\n\n*TOTAL: ${formatCurrency(quote.total)}*\n\n_Válido por 7 días. Ante cualquier consulta, no dudes en escribirnos._`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
@@ -257,21 +283,32 @@ export function QuoteView({ quote, onBack }: QuoteViewProps) {
         <div className="flex gap-2 flex-wrap">
           <button onClick={copyToClipboard} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm shadow-sm transition-all">
             {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
-            {copied ? 'Copiado!' : 'Copiar'}
+            {copied ? 'Copiado!' : 'Copiar Texto'}
           </button>
+          
+          <button 
+            onClick={exportAsImage} 
+            disabled={isExporting}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm shadow-sm transition-all disabled:opacity-50"
+          >
+            {isExporting ? <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> : <ImageIcon size={16} />}
+            {isExporting ? 'Procesando...' : 'Bajar Imagen (WhatsApp)'}
+          </button>
+
           <button onClick={shareWhatsApp} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 font-medium text-sm shadow-sm transition-all">
             <Share2 size={16} />
-            WhatsApp
+            Texto a WA
           </button>
+          
           <button onClick={downloadPDF} className="flex items-center gap-2 px-5 py-2 rounded-xl bg-stone-900 text-white hover:bg-stone-800 font-bold text-sm shadow-lg transition-all active:scale-95">
             <Printer size={16} />
-            Descargar PDF
+            PDF
           </button>
         </div>
       </div>
 
-      {/* ── PREVIEW ── */}
-      <div className="bg-white border border-slate-200 shadow-lg overflow-hidden rounded-lg">
+      {/* ── PREVIEW (The part we capture) ── */}
+      <div ref={quoteRef} className="bg-white border border-slate-200 shadow-lg overflow-hidden rounded-lg">
         <div className="h-1.5 bg-gradient-to-r from-amber-800 via-amber-500 to-yellow-400" />
 
         {/* Header */}
