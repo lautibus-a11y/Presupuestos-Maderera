@@ -1,0 +1,6 @@
+{
+  "name": "MadereraPro - Generador de Presupuestos",
+  "description": "Sistema integral para madereras: gestión de inventario, cálculo automático de presupuestos con márgenes y exportación a PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,21 +1,25 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# MadereraPro - Generador de Presupuestos
 
-# Run and deploy your AI Studio app
+Aplicación web autónoma para la gestión de productos y generación de presupuestos en formato PDF.
 
-This contains everything you need to run your app locally.
+## Características
+- **Sin base de datos externa**: Los datos se guardan de forma segura en tu navegador (LocalStorage).
+- **Sin Servidor**: Funciona como una aplicación estática (SPA).
+- **Privacidad**: Todo el procesamiento y almacenamiento ocurre localmente.
+- **Exportación PDF**: Genera presupuestos profesionales listos para enviar por WhatsApp o imprimir.
 
-View your app in AI Studio: https://ai.studio/apps/2ad4f8a5-e8db-4745-84cb-9c16da671d46
+## Desarrollo Local
+1. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+2. Inicia el modo desarrollo:
+   ```bash
+   npm run dev
+   ```
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
-# Presupuestos-Maderera
+## Despliegue en Vercel
+Esta aplicación está optimizada para Vercel como un proyecto de Vite.
+1. Conecta tu repositorio de GitHub.
+2. Vercel detectará automáticamente la configuración de Vite.
+3. ¡Listo! Sin configurar variables de entorno ni bases de datos.
