@@ -17,6 +17,89 @@ import { QuoteView } from './components/QuoteView';
 
 type View = 'dashboard' | 'quotes' | 'products' | 'generator' | 'detail';
 
+// --- CATÁLOGO INICIAL (SEMILLA) ---
+const INITIAL_PRODUCTS: Product[] = [
+  // Construcción
+  { id: 'c1', name: 'Tirante de pino 2x3 x 3.66m', type: 'Construcción', price: 9000, unit: 'un.' },
+  { id: 'c2', name: 'Tirante de pino 2x4 x 3.66m', type: 'Construcción', price: 12000, unit: 'un.' },
+  { id: 'c3', name: 'Tirante de pino 2x5 x 4.30m', type: 'Construcción', price: 18000, unit: 'un.' },
+  { id: 'c4', name: 'Tirante de pino 2x6 x 4.30m', type: 'Construcción', price: 22000, unit: 'un.' },
+  { id: 'c5', name: 'Viga maciza saligna 3x6', type: 'Construcción', price: 28000, unit: 'un.' },
+  { id: 'c6', name: 'Viga multilaminada', type: 'Construcción', price: 35000, unit: 'un.' },
+  { id: 'c7', name: 'Cabio 2x3', type: 'Construcción', price: 6500, unit: 'un.' },
+  { id: 'c8', name: 'Alfajía 1x2', type: 'Construcción', price: 3500, unit: 'un.' },
+  { id: 'c9', name: 'Tabla de pino para obra', type: 'Construcción', price: 5500, unit: 'un.' },
+  
+  // Madera Aserrada
+  { id: 'a1', name: 'Tabla de pino cepillada', type: 'Madera Aserrada', price: 6500, unit: 'un.' },
+  { id: 'a2', name: 'Tabla de eucalipto', type: 'Madera Aserrada', price: 10000, unit: 'un.' },
+  { id: 'a3', name: 'Tabla de paraíso', type: 'Madera Aserrada', price: 18000, unit: 'un.' },
+  { id: 'a4', name: 'Tabla de guatambú', type: 'Madera Aserrada', price: 22000, unit: 'un.' },
+  { id: 'a5', name: 'Tablón de viraró', type: 'Madera Aserrada', price: 55000, unit: 'un.' },
+  { id: 'a6', name: 'Tablón de anchico', type: 'Madera Aserrada', price: 65000, unit: 'un.' },
+  
+  // Machimbres
+  { id: 'm1', name: 'Machimbre pino estándar', type: 'Machimbres', price: 22000, unit: 'm2' },
+  { id: 'm2', name: 'Machimbre pino seleccionado', type: 'Machimbres', price: 32000, unit: 'm2' },
+  { id: 'm3', name: 'Machimbre eucalipto', type: 'Machimbres', price: 28000, unit: 'm2' },
+  { id: 'm4', name: 'Revestimiento alistonado', type: 'Machimbres', price: 15000, unit: 'm2' },
+  { id: 'm5', name: 'Listones decorativos', type: 'Machimbres', price: 4000, unit: 'un.' },
+  { id: 'm6', name: 'Molduras', type: 'Machimbres', price: 5500, unit: 'un.' },
+  { id: 'm7', name: 'Zócalos', type: 'Machimbres', price: 6000, unit: 'un.' },
+  
+  // Placas
+  { id: 'p1', name: 'MDF 18mm (2.75x1.83)', type: 'Placas', price: 160000, unit: 'placa' },
+  { id: 'p2', name: 'MDF 12mm', type: 'Placas', price: 110000, unit: 'placa' },
+  { id: 'p3', name: 'Melamina blanca', type: 'Placas', price: 170000, unit: 'placa' },
+  { id: 'p4', name: 'Melamina texturada', type: 'Placas', price: 190000, unit: 'placa' },
+  { id: 'p5', name: 'OSB 11mm', type: 'Placas', price: 35000, unit: 'placa' },
+  { id: 'p6', name: 'Fenólico 18mm', type: 'Placas', price: 95000, unit: 'placa' },
+  { id: 'p7', name: 'Placa enchapada', type: 'Placas', price: 120000, unit: 'placa' },
+  
+  // Carpintería
+  { id: 'cp1', name: 'Placa finger joint pino', type: 'Carpintería', price: 45000, unit: 'placa' },
+  { id: 'cp2', name: 'Placa encolada eucalipto', type: 'Carpintería', price: 6000, unit: 'placa' },
+  { id: 'cp3', name: 'Tablero macizo', type: 'Carpintería', price: 80000, unit: 'un.' },
+  { id: 'cp4', name: 'Mesada de madera', type: 'Carpintería', price: 180000, unit: 'un.' },
+  { id: 'cp5', name: 'Estante flotante', type: 'Carpintería', price: 28000, unit: 'un.' },
+  { id: 'cp6', name: 'Escalón de madera', type: 'Carpintería', price: 12000, unit: 'un.' },
+  
+  // Exterior
+  { id: 'e1', name: 'Deck pino tratado (m2)', type: 'Exterior', price: 28000, unit: 'm2' },
+  { id: 'e2', name: 'Deck madera dura (m2)', type: 'Exterior', price: 85000, unit: 'm2' },
+  { id: 'e3', name: 'Poste impregnado', type: 'Exterior', price: 12000, unit: 'un.' },
+  { id: 'e4', name: 'Durmiente', type: 'Exterior', price: 35000, unit: 'un.' },
+  { id: 'e5', name: 'Baldosa de madera', type: 'Exterior', price: 9000, unit: 'un.' },
+  
+  // Industrial
+  { id: 'i1', name: 'Pallet estándar', type: 'Industrial', price: 15000, unit: 'un.' },
+  { id: 'i2', name: 'Pallet reforzado', type: 'Industrial', price: 22000, unit: 'un.' },
+  { id: 'i3', name: 'Cajón de madera', type: 'Industrial', price: 12000, unit: 'un.' },
+  { id: 'i4', name: 'Listones industriales', type: 'Industrial', price: 5000, unit: 'un.' },
+  { id: 'i5', name: 'Separadores de carga', type: 'Industrial', price: 3000, unit: 'un.' },
+  
+  // Insumos
+  { id: 'in1', name: 'Tornillos para madera (x100)', type: 'Insumos', price: 5000, unit: 'pack' },
+  { id: 'in2', name: 'Tarugos', type: 'Insumos', price: 2500, unit: 'pack' },
+  { id: 'in3', name: 'Cola vinílica 1kg', type: 'Insumos', price: 6500, unit: 'kg' },
+  { id: 'in4', name: 'Adhesivo de contacto', type: 'Insumos', price: 9000, unit: 'un.' },
+  { id: 'in5', name: 'Tapacanto', type: 'Insumos', price: 3500, unit: 'm' },
+  { id: 'in6', name: 'Bisagras', type: 'Insumos', price: 4500, unit: 'un.' },
+  { id: 'in7', name: 'Correderas', type: 'Insumos', price: 12000, unit: 'par' },
+  
+  // Subproductos
+  { id: 's1', name: 'Aserrín (bolsa)', type: 'Subproductos', price: 2000, unit: 'bolsa' },
+  { id: 's2', name: 'Viruta', type: 'Subproductos', price: 3000, unit: 'bolsa' },
+  { id: 's3', name: 'Chips de madera', type: 'Subproductos', price: 10000, unit: 'm3' },
+  { id: 's4', name: 'Leña', type: 'Subproductos', price: 8000, unit: 'bolsa' },
+  
+  // Productos Terminados
+  { id: 't1', name: 'Tabla de asado', type: 'Terminados', price: 25000, unit: 'un.' },
+  { id: 't2', name: 'Puerta de madera', type: 'Terminados', price: 160000, unit: 'un.' },
+  { id: 't3', name: 'Mesa de madera', type: 'Terminados', price: 220000, unit: 'un.' },
+  { id: 't4', name: 'Banco de madera', type: 'Terminados', price: 90000, unit: 'un.' },
+];
+
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,12 +107,19 @@ export default function App() {
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load data from LocalStorage
+  // Load data from LocalStorage or use INITIAL_PRODUCTS
   useEffect(() => {
     const savedProducts = localStorage.getItem('maderera_products');
     const savedQuotes = localStorage.getItem('maderera_quotes');
 
-    if (savedProducts) setProducts(JSON.parse(savedProducts));
+    if (savedProducts) {
+      setProducts(JSON.parse(savedProducts));
+    } else {
+      // Si es la primera vez, cargar el catálogo semilla
+      setProducts(INITIAL_PRODUCTS);
+      localStorage.setItem('maderera_products', JSON.stringify(INITIAL_PRODUCTS));
+    }
+    
     if (savedQuotes) setQuotes(JSON.parse(savedQuotes));
     
     setLoading(false);
