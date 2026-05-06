@@ -3,7 +3,8 @@ import {
   Package, 
   Plus, 
   History,
-  LayoutDashboard
+  LayoutDashboard,
+  RefreshCw
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { Product, Quote } from './types';
@@ -17,7 +18,9 @@ import { QuoteView } from './components/QuoteView';
 
 type View = 'dashboard' | 'quotes' | 'products' | 'generator' | 'detail';
 
-// --- CATÁLOGO INICIAL (SEMILLA) ---
+// --- VERSIÓN DEL CATÁLOGO ---
+const DATA_VERSION = '1.1'; // Incrementa esto para forzar la actualización en los clientes
+
 const INITIAL_PRODUCTS: Product[] = [
   // Construcción
   { id: 'c1', name: 'Tirante de pino 2x3 x 3.66m', type: 'Construcción', price: 9000, unit: 'un.' },
@@ -58,7 +61,7 @@ const INITIAL_PRODUCTS: Product[] = [
   
   // Carpintería
   { id: 'cp1', name: 'Placa finger joint pino', type: 'Carpintería', price: 45000, unit: 'placa' },
-  { id: 'cp2', name: 'Placa encolada eucalipto', type: 'Carpintería', price: 6000, unit: 'placa' },
+  { id: 'cp2', name: 'Placa encolada eucalipto', type: 'Carpintería', price: 60000, unit: 'placa' },
   { id: 'cp3', name: 'Tablero macizo', type: 'Carpintería', price: 80000, unit: 'un.' },
   { id: 'cp4', name: 'Mesada de madera', type: 'Carpintería', price: 180000, unit: 'un.' },
   { id: 'cp5', name: 'Estante flotante', type: 'Carpintería', price: 28000, unit: 'un.' },
@@ -107,25 +110,27 @@ export default function App() {
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load data from LocalStorage or use INITIAL_PRODUCTS
+  // Initialize data and handle versioning
   useEffect(() => {
     const savedProducts = localStorage.getItem('maderera_products');
     const savedQuotes = localStorage.getItem('maderera_quotes');
+    const savedVersion = localStorage.getItem('maderera_version');
 
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    } else {
-      // Si es la primera vez, cargar el catálogo semilla
+    // LÓGICA DE ACTUALIZACIÓN AUTOMÁTICA
+    if (!savedVersion || savedVersion !== DATA_VERSION || !savedProducts || JSON.parse(savedProducts).length === 0) {
+      // Si la versión es vieja o no hay productos, inyectamos el catálogo
       setProducts(INITIAL_PRODUCTS);
       localStorage.setItem('maderera_products', JSON.stringify(INITIAL_PRODUCTS));
+      localStorage.setItem('maderera_version', DATA_VERSION);
+    } else {
+      setProducts(JSON.parse(savedProducts));
     }
     
     if (savedQuotes) setQuotes(JSON.parse(savedQuotes));
-    
     setLoading(false);
   }, []);
 
-  // Save data to LocalStorage whenever it changes
+  // Sync to LocalStorage
   useEffect(() => {
     if (!loading) {
       localStorage.setItem('maderera_products', JSON.stringify(products));
@@ -137,6 +142,14 @@ export default function App() {
       localStorage.setItem('maderera_quotes', JSON.stringify(quotes));
     }
   }, [quotes, loading]);
+
+  const handleResetCatalog = () => {
+    if (window.confirm("¿Estás seguro de que quieres restaurar el catálogo original? Se perderán los cambios en los precios actuales.")) {
+      setProducts(INITIAL_PRODUCTS);
+      localStorage.setItem('maderera_version', DATA_VERSION);
+      alert("Catálogo restaurado.");
+    }
+  };
 
   const handleDeleteQuote = (id: string) => {
     setQuotes(prev => prev.filter(q => q.id !== id));
@@ -177,7 +190,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-stone-100 font-sans text-stone-900 flex flex-col">
-      {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20 items-center">
@@ -193,6 +205,15 @@ export default function App() {
               <NavButton active={view === 'products'} onClick={() => setView('products')} icon={<Package size={18} />} label="Catálogo" />
             </div>
             <div className="flex items-center gap-4">
+              {view === 'products' && (
+                <button 
+                  onClick={handleResetCatalog}
+                  className="p-3 text-slate-400 hover:text-amber-700 transition-colors"
+                  title="Restaurar catálogo por defecto"
+                >
+                  <RefreshCw size={20} />
+                </button>
+              )}
               <button 
                 onClick={() => setView('generator')}
                 className="bg-slate-900 text-white px-5 py-3 rounded-2xl flex items-center gap-2 hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 font-bold text-sm active:scale-95"
@@ -213,28 +234,22 @@ export default function App() {
         ) : (
           <div className="view-container">
             {view === 'dashboard' && (
-              <Dashboard 
-                key="dashboard" 
-                quotes={quotes} 
-                products={products} 
-                onViewQuotes={() => setView('quotes')} 
-                onNewQuote={() => setView('generator')} 
-              />
+              <Dashboard quotes={quotes} products={products} onViewQuotes={() => setView('quotes')} onNewQuote={() => setView('generator')} />
             )}
             {view === 'quotes' && (
-              <QuotesList key="quotes" quotes={quotes} onViewDetail={(id) => { setSelectedQuoteId(id); setView('detail'); }} onDelete={handleDeleteQuote} />
+              <QuotesList quotes={quotes} onViewDetail={(id) => { setSelectedQuoteId(id); setView('detail'); }} onDelete={handleDeleteQuote} />
             )}
             {view === 'products' && (
-              <ProductManager key="products" products={products} onAction={handleProductAction} />
+              <ProductManager products={products} onAction={handleProductAction} />
             )}
             {view === 'generator' && (
-              <QuoteGenerator key="generator" products={products} onSubmit={handleCreateQuote} onCancel={() => setView('quotes')} />
+              <QuoteGenerator products={products} onSubmit={handleCreateQuote} onCancel={() => setView('quotes')} />
             )}
             {view === 'detail' && selectedQuoteId && (
               (() => {
                 const quote = quotes.find(q => q.id === selectedQuoteId);
                 if (!quote) return <div className="text-center py-20 text-slate-400">Cargando presupuesto...</div>;
-                return <QuoteView key="detail" quote={quote} onBack={() => setView('quotes')} />;
+                return <QuoteView quote={quote} onBack={() => setView('quotes')} />;
               })()
             )}
           </div>
@@ -247,13 +262,7 @@ export default function App() {
              <Package size={20} />
              <span className="font-bold tracking-tighter text-slate-800">MadereraPro</span>
           </div>
-          <p className="text-slate-400 text-sm font-medium">
-            &copy; 2026 MadereraPro. Todos los derechos reservados.
-          </p>
-          <div className="flex gap-6 text-slate-400 text-xs font-bold uppercase tracking-widest">
-             <a href="#" className="hover:text-amber-700 transition-colors">Soporte</a>
-             <a href="#" className="hover:text-amber-700 transition-colors">Privacidad</a>
-          </div>
+          <p className="text-slate-400 text-sm font-medium">&copy; 2026 MadereraPro. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
@@ -262,17 +271,9 @@ export default function App() {
 
 function NavButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) {
   return (
-    <button 
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm",
-        active ? "text-amber-700 bg-white shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-800"
-      )}
-    >
+    <button onClick={onClick} className={cn("flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all text-sm", active ? "text-amber-700 bg-white shadow-sm ring-1 ring-slate-200/50" : "text-slate-500 hover:text-slate-800")}>
       {icon}
       {label}
     </button>
   );
 }
-
-// v2
