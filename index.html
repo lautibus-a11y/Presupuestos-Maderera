@@ -1,13 +1,28 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Maderera Presupuestos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MadereraPro</title>
+    <style>
+      /* Bloqueo total de scroll horizontal y zoom */
+      html, body {
+        overflow-x: hidden;
+        position: relative;
+        width: 100%;
+        touch-action: pan-y; /* Solo permite scroll vertical */
+        -webkit-text-size-adjust: none; /* Evita que el navegador cambie tamaños de texto */
+      }
+      #root {
+        width: 100%;
+        overflow-x: hidden;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

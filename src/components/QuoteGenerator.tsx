@@ -16,13 +16,12 @@ export function QuoteGenerator({ products, onSubmit, onCancel }: QuoteGeneratorP
   const [searchTerm, setSearchTerm] = useState('');
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  // Filtrado inteligente
   const searchResults = useMemo(() => {
     if (!searchTerm.trim()) return [];
     return products.filter(p => 
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       p.type.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 5); // Mostramos solo los 5 más relevantes para no saturar
+    ).slice(0, 5);
   }, [searchTerm, products]);
 
   const handleAdd = (product: Product) => {
@@ -43,7 +42,6 @@ export function QuoteGenerator({ products, onSubmit, onCancel }: QuoteGeneratorP
         product
       }];
     });
-    // Limpiar búsqueda y cantidad después de agregar
     setSearchTerm('');
     setQuantities(prev => ({ ...prev, [product.id]: 1 }));
   };
@@ -55,102 +53,86 @@ export function QuoteGenerator({ products, onSubmit, onCancel }: QuoteGeneratorP
   const total = items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-4 px-1">
       
-      {/* ── CAJA ÚNICA DE PRESUPUESTO ── */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden">
+      <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-hidden">
         
-        {/* Encabezado: Cliente */}
-        <div className="bg-slate-900 p-6 md:p-8 text-white">
-          <div className="flex justify-between items-center mb-6">
-             <h2 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
-               <Package className="text-amber-500" size={24} />
-               Nuevo Presupuesto
+        {/* Encabezado: Cliente (Más compacto) */}
+        <div className="bg-slate-900 p-5 md:p-8 text-white">
+          <div className="flex justify-between items-center mb-5">
+             <h2 className="text-lg md:text-xl font-black uppercase tracking-tighter flex items-center gap-2">
+               <Package className="text-amber-500" size={20} />
+               Generar
              </h2>
-             <button onClick={onCancel} className="text-slate-400 hover:text-white transition-colors">
-               <X size={24} />
+             <button onClick={onCancel} className="text-slate-400 hover:text-white p-1">
+               <X size={20} />
              </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">
-                <User size={12} /> Nombre del Cliente
-              </label>
+          <div className="grid grid-cols-1 gap-3">
+            <div className="relative">
+              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input 
                 type="text" 
-                placeholder="Ej: Juan Pérez"
+                placeholder="Nombre del Cliente"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="w-full bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 transition-all outline-none"
+                className="w-full bg-slate-800 border-none rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold focus:ring-1 focus:ring-amber-500 outline-none"
               />
             </div>
-            <div className="space-y-1">
-              <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">
-                <Hash size={12} /> Celular / Referencia
-              </label>
+            <div className="relative">
+              <Hash size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input 
                 type="text" 
-                placeholder="Ej: 11 2345 6789"
+                placeholder="Teléfono / Celular"
                 value={clientPhone}
                 onChange={(e) => setClientPhone(e.target.value)}
-                className="w-full bg-slate-800 border-none rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-amber-500 transition-all outline-none"
+                className="w-full bg-slate-800 border-none rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold focus:ring-1 focus:ring-amber-500 outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Cuerpo: Buscador e Items */}
-        <div className="p-6 md:p-8 space-y-8">
+        <div className="p-4 md:p-8 space-y-6">
           
-          {/* BUSCADOR INTEGRADO */}
+          {/* BUSCADOR (Más pequeño) */}
           <div className="relative">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Buscar Producto</label>
             <div className="relative">
               <input 
                 type="text"
-                placeholder="Escribe madera, viga, placa..."
+                placeholder="Buscar producto..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 pl-12 pr-4 text-base font-bold focus:border-amber-500 transition-all outline-none shadow-inner"
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-3 pl-10 pr-4 text-sm font-bold focus:border-amber-500 outline-none"
               />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-              {searchTerm && (
-                <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  <X size={18} />
-                </button>
-              )}
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             </div>
 
-            {/* RESULTADOS INMEDIATOS */}
+            {/* RESULTADOS (Compactos) */}
             {searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-[2rem] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="p-2 space-y-1">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                <div className="p-1 space-y-0.5">
                   {searchResults.map(product => (
-                    <div key={product.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 hover:bg-amber-50 rounded-2xl transition-colors gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[10px] font-black text-amber-600 uppercase leading-none mb-1">{product.type}</p>
-                        <p className="font-black text-slate-800 text-sm md:text-base uppercase truncate leading-tight">{product.name}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">{formatCurrency(product.price)} / {product.unit}</p>
+                    <div key={product.id} className="flex items-center justify-between p-3 hover:bg-amber-50 rounded-xl gap-2">
+                      <div className="min-w-0 flex-grow">
+                        <p className="font-black text-slate-800 text-[11px] uppercase truncate">{product.name}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase">{formatCurrency(product.price)} / {product.unit}</p>
                       </div>
                       
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-                          <span className="text-[9px] font-black text-slate-400 uppercase pl-2">Cant</span>
-                          <input 
-                            type="number" 
-                            min="1"
-                            value={quantities[product.id] || 1}
-                            onChange={(e) => setQuantities(prev => ({ ...prev, [product.id]: parseFloat(e.target.value) }))}
-                            className="w-12 bg-transparent text-center font-black text-slate-800 text-sm outline-none"
-                          />
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="number" 
+                          min="1"
+                          value={quantities[product.id] || 1}
+                          onChange={(e) => setQuantities(prev => ({ ...prev, [product.id]: parseFloat(e.target.value) }))}
+                          className="w-10 bg-slate-100 rounded-lg py-1 text-center font-black text-slate-800 text-[10px] outline-none"
+                        />
                         <button 
                           onClick={() => handleAdd(product)}
-                          className="bg-amber-600 text-white px-4 py-3 rounded-xl font-black text-xs uppercase shadow-lg shadow-amber-200 active:scale-95 transition-all flex items-center gap-2"
+                          className="bg-amber-600 text-white p-2 rounded-lg active:scale-95 transition-all"
                         >
-                          <Plus size={16} />
-                          Añadir
+                          <Plus size={14} />
                         </button>
                       </div>
                     </div>
@@ -160,31 +142,28 @@ export function QuoteGenerator({ products, onSubmit, onCancel }: QuoteGeneratorP
             )}
           </div>
 
-          {/* LISTA DE MATERIALES AÑADIDOS */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest border-b-2 border-slate-100 pb-2">Materiales en Presupuesto</h3>
+          {/* LISTA DE ITEMS (Compacta) */}
+          <div className="space-y-2">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-1">Seleccionados</h3>
             
             {items.length === 0 ? (
-              <div className="py-12 text-center text-slate-300">
-                <Package size={48} className="mx-auto mb-3 opacity-20" />
-                <p className="font-bold text-sm uppercase tracking-tighter italic">No hay productos seleccionados aún</p>
+              <div className="py-8 text-center text-slate-200">
+                <p className="text-[10px] font-bold uppercase tracking-widest italic">Lista vacía</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {items.map((item) => (
-                  <div key={item.productId} className="bg-slate-50 rounded-2xl p-4 flex items-center justify-between gap-4 border border-slate-100 group">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <button onClick={() => removeItem(item.productId!)} className="text-slate-300 hover:text-red-500 transition-colors">
-                        <Trash2 size={18} />
+                  <div key={item.productId} className="bg-slate-50/50 rounded-xl p-3 flex items-center justify-between gap-3 border border-slate-100">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <button onClick={() => removeItem(item.productId!)} className="text-slate-300 hover:text-red-500">
+                        <Trash2 size={14} />
                       </button>
                       <div className="min-w-0">
-                        <p className="font-black text-slate-800 text-sm uppercase truncate leading-tight">{item.product?.name}</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">{item.quantity} {item.product?.unit} x {formatCurrency(item.unitPrice || 0)}</p>
+                        <p className="font-black text-slate-800 text-[11px] uppercase truncate leading-tight">{item.product?.name}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase">{item.quantity} {item.product?.unit} x {formatCurrency(item.unitPrice || 0)}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-black text-amber-700 text-base md:text-lg tracking-tighter">{formatCurrency(item.subtotal || 0)}</p>
-                    </div>
+                    <p className="font-black text-amber-700 text-xs">{formatCurrency(item.subtotal || 0)}</p>
                   </div>
                 ))}
               </div>
@@ -192,20 +171,19 @@ export function QuoteGenerator({ products, onSubmit, onCancel }: QuoteGeneratorP
           </div>
         </div>
 
-        {/* Pie: Total y Guardar */}
-        <div className="bg-slate-50 border-t border-slate-100 p-6 md:p-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* Pie: Total y Guardar (Más compacto) */}
+        <div className="bg-slate-50 border-t border-slate-100 p-5">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Total a presupuestar</p>
-              <p className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter">{formatCurrency(total)}</p>
+              <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest leading-none mb-1">Total</p>
+              <p className="text-2xl font-black text-slate-900 tracking-tighter leading-none">{formatCurrency(total)}</p>
             </div>
             <button
               disabled={items.length === 0}
               onClick={() => onSubmit({ clientName: `${clientName} ${clientPhone}`, total, items })}
-              className="w-full md:w-auto bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white px-10 py-5 rounded-2xl font-black text-base uppercase tracking-widest shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3"
+              className="bg-slate-900 disabled:bg-slate-200 text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all shadow-lg"
             >
-              <Save size={22} />
-              Finalizar Presupuesto
+              Finalizar
             </button>
           </div>
         </div>
